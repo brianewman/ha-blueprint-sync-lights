@@ -1,5 +1,5 @@
 blueprint:
-  name: Sync Multiple Lights
+  name: Sync two lights
   description: Sync the On/Off status of 2 lights
   domain: automation
   input:
