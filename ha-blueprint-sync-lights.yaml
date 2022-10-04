@@ -1,0 +1,35 @@
+blueprint:
+  name: Sync Multiple Lights
+  description: Sync the On/Off status of 2 lights
+  domain: automation
+  input:
+    light:
+      name: Lights to Control
+      selector:
+        entity:
+          multiple: true
+          domain: light
+variables:
+  lights: !input light
+trigger:
+  - platform: state
+    entity_id: !input light
+condition: 
+  - "{{ trigger.to_state.context.parent_id == none }}"
+  - "{{ trigger.to_state.state == 'on' or trigger.to_state.state == 'off' }}"
+action:
+  - service_template: >
+      {% if trigger.to_state.state == 'on' %}
+      light.turn_on
+      {% elif trigger.to_state.state == 'off' %}
+      light.turn_off
+      {% endif %}
+    data_template: 
+      entity_id: >
+        {% set ts = namespace(light=[]) %}
+        {% for sw in lights %}
+          {% if not is_state(sw,trigger.to_state.state) %}
+            {% set ts.light = ts.light + [sw] %}
+          {% endif %}
+        {% endfor %}
+        {{ ts.light | list }}
